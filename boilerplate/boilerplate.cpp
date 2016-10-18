@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <string>
 #include <iterator>
+#include <vector>
 
 // specify that we want the OpenGL core profile before including GLFW headers
 #ifdef _WIN32
@@ -41,7 +42,8 @@ bool CheckGLErrors();
 
 string LoadSource(const string &filename);
 GLuint CompileShader(GLenum shaderType, const string &source);
-GLuint LinkProgram(GLuint vertexShader, GLuint fragmentShader);
+GLuint LinkProgram(GLuint vertexShader, GLuint tessControlShader,
+   GLuint tessEvalShader, GLuint fragmentShader);
 
 // --------------------------------------------------------------------------
 // Functions to set up OpenGL shader programs for rendering
@@ -49,12 +51,14 @@ GLuint LinkProgram(GLuint vertexShader, GLuint fragmentShader);
 struct MyShader
 {
 	// OpenGL names for vertex and fragment shaders, shader program
-	GLuint  vertex;
+   GLuint  vertex;
+   GLuint  tessControl;
+   GLuint  tessEval;
 	GLuint  fragment;
 	GLuint  program;
 
 	// initialize shader and program names to zero (OpenGL reserved value)
-	MyShader() : vertex(0), fragment(0), program(0)
+   MyShader() : vertex(0), tessControl(0), tessEval(0), fragment(0), program(0)
 	{}
 };
 
@@ -62,16 +66,22 @@ struct MyShader
 bool InitializeShaders(MyShader *shader)
 {
 	// load shader source from files
-	string vertexSource = LoadSource("vertex.glsl");
+   string vertexSource = LoadSource("vertex.glsl");
+   string tessControlSource = LoadSource("tessControl.glsl");
+   string tessEvalSource = LoadSource("tessEval.glsl");
 	string fragmentSource = LoadSource("fragment.glsl");
-	if (vertexSource.empty() || fragmentSource.empty()) return false;
+	if (vertexSource.empty() || fragmentSource.empty() || 
+      tessControlSource.empty() || tessEvalSource.empty()) 
+      return false;
 
 	// compile shader source into shader objects
-	shader->vertex = CompileShader(GL_VERTEX_SHADER, vertexSource);
+   shader->vertex = CompileShader(GL_VERTEX_SHADER, vertexSource);
+   shader->tessControl = CompileShader(GL_TESS_CONTROL_SHADER, tessControlSource);
+   shader->tessEval = CompileShader(GL_TESS_EVALUATION_SHADER, tessEvalSource);
 	shader->fragment = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
 
 	// link shader program
-	shader->program = LinkProgram(shader->vertex, shader->fragment);
+   shader->program = LinkProgram(shader->vertex, shader->tessControl, shader->tessEval, shader->fragment);
 
 	// check for OpenGL errors and return false if error occurred
 	return !CheckGLErrors();
@@ -83,64 +93,10 @@ void DestroyShaders(MyShader *shader)
 	// unbind any shader programs and destroy shader objects
 	glUseProgram(0);
 	glDeleteProgram(shader->program);
-	glDeleteShader(shader->vertex);
+   glDeleteShader(shader->vertex);
+   glDeleteShader(shader->tessControl);
+   glDeleteShader(shader->tessEval);
 	glDeleteShader(shader->fragment);
-}
-
-// --------------------------------------------------------------------------
-// Functions to set up OpenGL buffers for storing textures
-
-struct MyTexture
-{
-	GLuint textureID;
-	GLuint target;
-	int width;
-	int height;
-
-	// initialize object names to zero (OpenGL reserved value)
-	MyTexture() : textureID(0), target(0), width(0), height(0)
-	{}
-};
-
-bool InitializeTexture(MyTexture* texture, const char* filename, GLuint target = GL_TEXTURE_2D)
-{
-	int numComponents;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char *data = stbi_load(filename, &texture->width, &texture->height, &numComponents, 0);
-	if (data != nullptr)
-	{
-		texture->target = target;
-		glGenTextures(1, &texture->textureID);
-		glBindTexture(texture->target, texture->textureID);
-		GLuint format = numComponents == 3 ? GL_RGB : GL_RGBA;
-		glTexImage2D(texture->target, 0, format, texture->width, texture->height, 0, format, GL_UNSIGNED_BYTE, data);
-
-		// Note: Only wrapping modes supported for GL_TEXTURE_RECTANGLE when defining
-		// GL_TEXTURE_WRAP are GL_CLAMP_TO_EDGE or GL_CLAMP_TO_BORDER
-		glTexParameteri(texture->target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(texture->target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(texture->target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(texture->target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		// Clean up
-		glBindTexture(texture->target, 0);
-		stbi_image_free(data);
-		return !CheckGLErrors();
-	}
-	return true; //error
-}
-
-// deallocate texture-related objects
-void DestroyTexture(MyTexture *texture)
-{
-	glBindTexture(texture->target, 0);
-	glDeleteTextures(1, &texture->textureID);
-}
-
-void SaveImage(const char* filename, int width, int height, unsigned char *data, int numComponents = 3, int stride = 0)
-{
-	if (!stbi_write_png(filename, width, height, numComponents, data, stride))
-		cout << "Unable to save image: " << filename << endl;
 }
 
 // --------------------------------------------------------------------------
@@ -160,22 +116,81 @@ struct MyGeometry
 	{}
 };
 
+void initQuadraticControlPoints(vector<GLfloat> vertices, vector<GLfloat> colours)
+{
+   GLfloat scale = 2.0f;
+
+   // first set
+   vertices.push_back(1.0f / scale);
+   vertices.push_back(1.0f / scale);
+   vertices.push_back(2.0f / scale);
+   vertices.push_back(-1.0f / scale);
+   vertices.push_back(0.0f / scale);
+   vertices.push_back(-1.0f / scale);
+
+   //second set
+   //vertices.push_back(0.0f);
+   //vertices.push_back(-1.0f);
+   //vertices.push_back(-2.0f);
+   //vertices.push_back(-1.0f);
+   //vertices.push_back(-1.0f);
+   //vertices.push_back(1.0f);
+
+   // third set
+   //vertices.push_back(-1.0f);
+   //vertices.push_back(1.0f);
+   //vertices.push_back(0.0f);
+   //vertices.push_back(1.0f);
+   //vertices.push_back(1.0f);
+   //vertices.push_back(1.0f);
+
+   //fourth set
+   //vertices.push_back(1.2f);
+   //vertices.push_back(0.5f);
+   //vertices.push_back(2.5f);
+   //vertices.push_back(1.0f);
+   //vertices.push_back(1.3f);
+   //vertices.push_back(-0.4f);
+
+   for (int i = 0; i < vertices.size() / 2; i++)
+   {
+      colours.push_back(i / 3.0f);
+      colours.push_back(i / 3.0f);
+      colours.push_back(i / 3.0f);
+   }
+}
+
+void initCubicControlPoints(vector<GLfloat> vertices, vector<GLfloat> colours)
+{
+   GLfloat scale = 10.0f;
+
+   vertices.push_back(1.0f / scale);
+   vertices.push_back(1.0f / scale);
+   vertices.push_back(4.0f / scale);
+   vertices.push_back(0.0f / scale);
+   vertices.push_back(6.0f / scale);
+   vertices.push_back(2.0f / scale);
+   vertices.push_back(9.0f / scale);
+   vertices.push_back(1.0f / scale);
+
+   for (int i = 0; i < vertices.size() / 2; i++)
+   {
+      colours.push_back(i / 4.0f);
+      colours.push_back(i / 4.0f);
+      colours.push_back(i / 4.0f);
+   }
+}
+
 // create buffers and fill with geometry data, returning true if successful
 bool InitializeGeometry(MyGeometry *geometry)
 {
-	// three vertex positions and assocated colours of a triangle
-	const GLfloat vertices[][2] = {
-		{ -.6f, -.4f },
-		{ .0f, .6f },
-		{ .6f, -.4f }
-	};
+	// three vertex positions and associated colours of a triangle
+   vector<GLfloat> vertices;
+   vector<GLfloat> colours;
 
-	const GLfloat colours[][3] = {
-		{ 1.0f, 0.0f, 0.0f },
-		{ 0.0f, 1.0f, 0.0f },
-		{ 0.0f, 0.0f, 1.0f }
-	};
-	geometry->elementCount = 3;
+   initCubicControlPoints(vertices, colours);
+
+	geometry->elementCount = vertices.size() / 2;
 
 	// these vertex attribute indices correspond to those specified for the
 	// input variables in the vertex shader
@@ -185,12 +200,12 @@ bool InitializeGeometry(MyGeometry *geometry)
 	// create an array buffer object for storing our vertices
 	glGenBuffers(1, &geometry->vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry->vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	// create another one for storing our colours
 	glGenBuffers(1, &geometry->colourBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry->colourBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colours), colours, GL_STATIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, colours.size()*sizeof(GLfloat), colours.data(), GL_STATIC_DRAW);
 
 	// create a vertex array object encapsulating all our vertex attributes
 	glGenVertexArrays(1, &geometry->vertexArray);
@@ -201,7 +216,7 @@ bool InitializeGeometry(MyGeometry *geometry)
 	glVertexAttribPointer(VERTEX_INDEX, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(VERTEX_INDEX);
 
-	// assocaite the colour array with the vertex array object
+	// associate the colour array with the vertex array object
 	glBindBuffer(GL_ARRAY_BUFFER, geometry->colourBuffer);
 	glVertexAttribPointer(COLOUR_INDEX, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(COLOUR_INDEX);
@@ -237,7 +252,7 @@ void RenderScene(MyGeometry *geometry, MyShader *shader)
 	// scene geometry, then tell OpenGL to draw our geometry
 	glUseProgram(shader->program);
 	glBindVertexArray(geometry->vertexArray);
-	glDrawArrays(GL_TRIANGLES, 0, geometry->elementCount);
+	glDrawArrays(GL_LINES, 0, geometry->elementCount);
 
 	// reset state to default (no shader or geometry bound)
 	glBindVertexArray(0);
@@ -282,7 +297,8 @@ int main(int argc, char *argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	window = glfwCreateWindow(512, 512, "CPSC 453 OpenGL Boilerplate", 0, 0);
+   glfwWindowHint(GLFW_SAMPLES, 4);
+	window = glfwCreateWindow(512, 512, "CPSC 453 OpenGL Assignment 3", 0, 0);
 	if (!window) {
 		cout << "Program failed to create GLFW window, TERMINATING" << endl;
 		glfwTerminate();
@@ -293,7 +309,7 @@ int main(int argc, char *argv[])
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwMakeContextCurrent(window);
 
-	//Intialize GLAD
+	//Initialize GLAD
 	if (!gladLoadGL())
 	{
 		cout << "GLAD init failed" << endl;
@@ -313,7 +329,13 @@ int main(int argc, char *argv[])
 	// call function to create and fill buffers with geometry data
 	MyGeometry geometry;
 	if (!InitializeGeometry(&geometry))
-		cout << "Program failed to intialize geometry!" << endl;
+		cout << "Program failed to initialize geometry!" << endl;
+
+   glUseProgram(shader.program);
+   GLuint uOuter0Uniform = glGetUniformLocation(shader.program, "uOuter0");
+   GLuint uOuter1Uniform = glGetUniformLocation(shader.program, "uOuter1");
+   glUniform3i(uOuter0Uniform, 0, 1, 5);
+   glUniform3i(uOuter1Uniform, 3, 5, 50);
 
 	// run an event-triggered main loop
 	while (!glfwWindowShouldClose(window))
@@ -431,13 +453,16 @@ GLuint CompileShader(GLenum shaderType, const string &source)
 }
 
 // creates and returns a program object linked from vertex and fragment shaders
-GLuint LinkProgram(GLuint vertexShader, GLuint fragmentShader)
+GLuint LinkProgram(GLuint vertexShader, GLuint tessControlShader, 
+   GLuint tessEvalShader, GLuint fragmentShader)
 {
 	// allocate program object name
 	GLuint programObject = glCreateProgram();
 
 	// attach provided shader objects to this program
-	if (vertexShader)   glAttachShader(programObject, vertexShader);
+   if (vertexShader)   glAttachShader(programObject, vertexShader);
+   if (tessControlShader)   glAttachShader(programObject, tessControlShader);
+   if (tessEvalShader)   glAttachShader(programObject, tessEvalShader);
 	if (fragmentShader) glAttachShader(programObject, fragmentShader);
 
 	// try linking the program with given attachments
