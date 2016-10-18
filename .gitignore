@@ -1,3 +1,9 @@
+# Folders
+middleware/
+
+# Prerequisites
+*.d
+
 # Compiled Object files
 *.slo
 *.lo
@@ -12,6 +18,7 @@
 *.so
 *.dylib
 *.dll
+*.lib
 
 # Fortran module files
 *.mod
@@ -27,3 +34,37 @@
 *.exe
 *.out
 *.app
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+*.sdf
+*.opensdf
+*.sln
+*vcxproj*
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.idb
+*.svclog
+*.scc
