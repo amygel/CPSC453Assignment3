@@ -42,8 +42,7 @@ bool CheckGLErrors();
 
 string LoadSource(const string &filename);
 GLuint CompileShader(GLenum shaderType, const string &source);
-GLuint LinkProgram(GLuint vertexShader, GLuint tessControlShader,
-   GLuint tessEvalShader, GLuint fragmentShader);
+GLuint LinkProgram(GLuint vertexShader, GLuint TCSshader, GLuint TESshader, GLuint fragmentShader);
 
 // --------------------------------------------------------------------------
 // Functions to set up OpenGL shader programs for rendering
@@ -51,14 +50,14 @@ GLuint LinkProgram(GLuint vertexShader, GLuint tessControlShader,
 struct MyShader
 {
 	// OpenGL names for vertex and fragment shaders, shader program
-   GLuint  vertex;
-   GLuint  tessControl;
-   GLuint  tessEval;
+	GLuint  vertex;
+	GLuint  TCS;
+	GLuint  TES;
 	GLuint  fragment;
 	GLuint  program;
 
 	// initialize shader and program names to zero (OpenGL reserved value)
-   MyShader() : vertex(0), tessControl(0), tessEval(0), fragment(0), program(0)
+	MyShader() : vertex(0), TCS(0), TES(0), fragment(0), program(0)
 	{}
 };
 
@@ -66,22 +65,22 @@ struct MyShader
 bool InitializeShaders(MyShader *shader)
 {
 	// load shader source from files
-   string vertexSource = LoadSource("vertex.glsl");
-   string tessControlSource = LoadSource("tessControl.glsl");
-   string tessEvalSource = LoadSource("tessEval.glsl");
+	string vertexSource = LoadSource("vertex.glsl");
 	string fragmentSource = LoadSource("fragment.glsl");
-	if (vertexSource.empty() || fragmentSource.empty() || 
-      tessControlSource.empty() || tessEvalSource.empty()) 
-      return false;
+	string TCSSource = LoadSource("tessControl.glsl");
+	string TESSource = LoadSource("tessEval.glsl");
+	if (vertexSource.empty() || fragmentSource.empty() ||
+		TCSSource.empty() || TESSource.empty())
+		return false;
 
 	// compile shader source into shader objects
-   shader->vertex = CompileShader(GL_VERTEX_SHADER, vertexSource);
-   shader->tessControl = CompileShader(GL_TESS_CONTROL_SHADER, tessControlSource);
-   shader->tessEval = CompileShader(GL_TESS_EVALUATION_SHADER, tessEvalSource);
+	shader->vertex = CompileShader(GL_VERTEX_SHADER, vertexSource);
 	shader->fragment = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
+	shader->TCS = CompileShader(GL_TESS_CONTROL_SHADER, TCSSource);
+	shader->TES = CompileShader(GL_TESS_EVALUATION_SHADER, TESSource);
 
 	// link shader program
-   shader->program = LinkProgram(shader->vertex, shader->tessControl, shader->tessEval, shader->fragment);
+	shader->program = LinkProgram(shader->vertex, shader->TCS, shader->TES, shader->fragment);
 
 	// check for OpenGL errors and return false if error occurred
 	return !CheckGLErrors();
@@ -93,10 +92,10 @@ void DestroyShaders(MyShader *shader)
 	// unbind any shader programs and destroy shader objects
 	glUseProgram(0);
 	glDeleteProgram(shader->program);
-   glDeleteShader(shader->vertex);
-   glDeleteShader(shader->tessControl);
-   glDeleteShader(shader->tessEval);
+	glDeleteShader(shader->vertex);
 	glDeleteShader(shader->fragment);
+	glDeleteShader(shader->TCS);
+	glDeleteShader(shader->TES);
 }
 
 // --------------------------------------------------------------------------
@@ -118,79 +117,90 @@ struct MyGeometry
 
 void initQuadraticControlPoints(vector<GLfloat> vertices, vector<GLfloat> colours)
 {
-   GLfloat scale = 2.0f;
+	GLfloat scale = 2.0f;
 
-   // first set
-   vertices.push_back(1.0f / scale);
-   vertices.push_back(1.0f / scale);
-   vertices.push_back(2.0f / scale);
-   vertices.push_back(-1.0f / scale);
-   vertices.push_back(0.0f / scale);
-   vertices.push_back(-1.0f / scale);
+	// first set
+	vertices.push_back(1.0f / scale);
+	vertices.push_back(1.0f / scale);
+	vertices.push_back(2.0f / scale);
+	vertices.push_back(-1.0f / scale);
+	vertices.push_back(0.0f / scale);
+	vertices.push_back(-1.0f / scale);
 
-   //second set
-   //vertices.push_back(0.0f);
-   //vertices.push_back(-1.0f);
-   //vertices.push_back(-2.0f);
-   //vertices.push_back(-1.0f);
-   //vertices.push_back(-1.0f);
-   //vertices.push_back(1.0f);
+	//second set
+	//vertices.push_back(0.0f);
+	//vertices.push_back(-1.0f);
+	//vertices.push_back(-2.0f);
+	//vertices.push_back(-1.0f);
+	//vertices.push_back(-1.0f);
+	//vertices.push_back(1.0f);
 
-   // third set
-   //vertices.push_back(-1.0f);
-   //vertices.push_back(1.0f);
-   //vertices.push_back(0.0f);
-   //vertices.push_back(1.0f);
-   //vertices.push_back(1.0f);
-   //vertices.push_back(1.0f);
+	// third set
+	//vertices.push_back(-1.0f);
+	//vertices.push_back(1.0f);
+	//vertices.push_back(0.0f);
+	//vertices.push_back(1.0f);
+	//vertices.push_back(1.0f);
+	//vertices.push_back(1.0f);
 
-   //fourth set
-   //vertices.push_back(1.2f);
-   //vertices.push_back(0.5f);
-   //vertices.push_back(2.5f);
-   //vertices.push_back(1.0f);
-   //vertices.push_back(1.3f);
-   //vertices.push_back(-0.4f);
+	//fourth set
+	//vertices.push_back(1.2f);
+	//vertices.push_back(0.5f);
+	//vertices.push_back(2.5f);
+	//vertices.push_back(1.0f);
+	//vertices.push_back(1.3f);
+	//vertices.push_back(-0.4f);
 
-   for (int i = 0; i < vertices.size() / 2; i++)
-   {
-      colours.push_back(i / 3.0f);
-      colours.push_back(i / 3.0f);
-      colours.push_back(i / 3.0f);
-   }
+	for (int i = 0; i < vertices.size() / 2; i++)
+	{
+		colours.push_back(i / 3.0f);
+		colours.push_back(i / 3.0f);
+		colours.push_back(i / 3.0f);
+	}
 }
 
 void initCubicControlPoints(vector<GLfloat> vertices, vector<GLfloat> colours)
 {
-   GLfloat scale = 10.0f;
+	GLfloat scale = 10.0f;
 
-   vertices.push_back(1.0f / scale);
-   vertices.push_back(1.0f / scale);
-   vertices.push_back(4.0f / scale);
-   vertices.push_back(0.0f / scale);
-   vertices.push_back(6.0f / scale);
-   vertices.push_back(2.0f / scale);
-   vertices.push_back(9.0f / scale);
-   vertices.push_back(1.0f / scale);
+	vertices.push_back(1.0f / scale);
+	vertices.push_back(1.0f / scale);
+	vertices.push_back(4.0f / scale);
+	vertices.push_back(0.0f / scale);
+	vertices.push_back(6.0f / scale);
+	vertices.push_back(2.0f / scale);
+	vertices.push_back(9.0f / scale);
+	vertices.push_back(1.0f / scale);
 
-   for (int i = 0; i < vertices.size() / 2; i++)
-   {
-      colours.push_back(i / 4.0f);
-      colours.push_back(i / 4.0f);
-      colours.push_back(i / 4.0f);
-   }
+	for (int i = 0; i < vertices.size() / 2; i++)
+	{
+		colours.push_back(i / 4.0f);
+		colours.push_back(i / 4.0f);
+		colours.push_back(i / 4.0f);
+	}
 }
 
 // create buffers and fill with geometry data, returning true if successful
 bool InitializeGeometry(MyGeometry *geometry)
 {
 	// three vertex positions and associated colours of a triangle
-   vector<GLfloat> vertices;
-   vector<GLfloat> colours;
+	//vector<GLfloat> vertices;
+	//vector<GLfloat> colours;
 
-   initCubicControlPoints(vertices, colours);
+	//initQuadraticControlPoints(vertices, colours);
+	
+	//geometry->elementCount = vertices.size() / 2;
 
-	geometry->elementCount = vertices.size() / 2;
+	const GLfloat vertices[][2] = {
+		{ -.6f, -.4f },
+		{ .6f, .4f }
+	};
+
+	const GLfloat colours[][3] = {
+		{ 1.0f, 0.0f, 0.0f },
+		{ 0.0f, 0.0f, 1.0f }
+	};
+	geometry->elementCount = 2;
 
 	// these vertex attribute indices correspond to those specified for the
 	// input variables in the vertex shader
@@ -200,12 +210,12 @@ bool InitializeGeometry(MyGeometry *geometry)
 	// create an array buffer object for storing our vertices
 	glGenBuffers(1, &geometry->vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry->vertexBuffer);
-   glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	// create another one for storing our colours
 	glGenBuffers(1, &geometry->colourBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry->colourBuffer);
-   glBufferData(GL_ARRAY_BUFFER, colours.size()*sizeof(GLfloat), colours.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(colours), colours, GL_STATIC_DRAW);
 
 	// create a vertex array object encapsulating all our vertex attributes
 	glGenVertexArrays(1, &geometry->vertexArray);
@@ -252,7 +262,7 @@ void RenderScene(MyGeometry *geometry, MyShader *shader)
 	// scene geometry, then tell OpenGL to draw our geometry
 	glUseProgram(shader->program);
 	glBindVertexArray(geometry->vertexArray);
-	glDrawArrays(GL_LINES, 0, geometry->elementCount);
+	glDrawArrays(GL_PATCHES, 0, geometry->elementCount);
 
 	// reset state to default (no shader or geometry bound)
 	glBindVertexArray(0);
@@ -297,7 +307,7 @@ int main(int argc, char *argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-   glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	window = glfwCreateWindow(512, 512, "CPSC 453 OpenGL Assignment 3", 0, 0);
 	if (!window) {
 		cout << "Program failed to create GLFW window, TERMINATING" << endl;
@@ -329,13 +339,9 @@ int main(int argc, char *argv[])
 	// call function to create and fill buffers with geometry data
 	MyGeometry geometry;
 	if (!InitializeGeometry(&geometry))
-		cout << "Program failed to initialize geometry!" << endl;
+		cout << "Program failed to intialize geometry!" << endl;
 
-   glUseProgram(shader.program);
-   GLuint uOuter0Uniform = glGetUniformLocation(shader.program, "uOuter0");
-   GLuint uOuter1Uniform = glGetUniformLocation(shader.program, "uOuter1");
-   glUniform3i(uOuter0Uniform, 0, 1, 5);
-   glUniform3i(uOuter1Uniform, 3, 5, 50);
+	glPatchParameteri(GL_PATCH_VERTICES, 2);
 
 	// run an event-triggered main loop
 	while (!glfwWindowShouldClose(window))
@@ -453,16 +459,15 @@ GLuint CompileShader(GLenum shaderType, const string &source)
 }
 
 // creates and returns a program object linked from vertex and fragment shaders
-GLuint LinkProgram(GLuint vertexShader, GLuint tessControlShader, 
-   GLuint tessEvalShader, GLuint fragmentShader)
+GLuint LinkProgram(GLuint vertexShader, GLuint TCSshader, GLuint TESshader, GLuint fragmentShader)
 {
 	// allocate program object name
 	GLuint programObject = glCreateProgram();
 
 	// attach provided shader objects to this program
-   if (vertexShader)   glAttachShader(programObject, vertexShader);
-   if (tessControlShader)   glAttachShader(programObject, tessControlShader);
-   if (tessEvalShader)   glAttachShader(programObject, tessEvalShader);
+	if (vertexShader)   glAttachShader(programObject, vertexShader);
+	if (TCSshader) glAttachShader(programObject, TCSshader);
+	if (TESshader) glAttachShader(programObject, TESshader);
 	if (fragmentShader) glAttachShader(programObject, fragmentShader);
 
 	// try linking the program with given attachments
