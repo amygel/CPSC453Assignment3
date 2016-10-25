@@ -115,7 +115,7 @@ struct MyGeometry
 	{}
 };
 
-void initQuadraticControlPoints(vector<GLfloat> vertices, vector<GLfloat> colours)
+void initQuadraticControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colours)
 {
 	GLfloat scale = 2.0f;
 
@@ -154,53 +154,49 @@ void initQuadraticControlPoints(vector<GLfloat> vertices, vector<GLfloat> colour
 	for (int i = 0; i < vertices.size() / 2; i++)
 	{
 		colours.push_back(i / 3.0f);
-		colours.push_back(i / 3.0f);
-		colours.push_back(i / 3.0f);
+		colours.push_back(0.0f);
+		colours.push_back(0.0f);
 	}
 }
 
-void initCubicControlPoints(vector<GLfloat> vertices, vector<GLfloat> colours)
+void initCubicControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colours)
 {
 	GLfloat scale = 10.0f;
 
 	vertices.push_back(1.0f / scale);
 	vertices.push_back(1.0f / scale);
+
 	vertices.push_back(4.0f / scale);
 	vertices.push_back(0.0f / scale);
+	vertices.push_back(4.0f / scale);
+	vertices.push_back(0.0f / scale);
+
 	vertices.push_back(6.0f / scale);
 	vertices.push_back(2.0f / scale);
+	vertices.push_back(6.0f / scale);
+	vertices.push_back(2.0f / scale);
+
 	vertices.push_back(9.0f / scale);
 	vertices.push_back(1.0f / scale);
 
 	for (int i = 0; i < vertices.size() / 2; i++)
 	{
-		colours.push_back(i / 4.0f);
-		colours.push_back(i / 4.0f);
-		colours.push_back(i / 4.0f);
+		colours.push_back(1.0f);
+		colours.push_back(0.0f);
+		colours.push_back(0.0f);
 	}
 }
 
 // create buffers and fill with geometry data, returning true if successful
 bool InitializeGeometry(MyGeometry *geometry)
 {
-	// three vertex positions and associated colours of a triangle
-	//vector<GLfloat> vertices;
-	//vector<GLfloat> colours;
+	vector<GLfloat> vertices;
+	vector<GLfloat> colours;
 
 	//initQuadraticControlPoints(vertices, colours);
+	initCubicControlPoints(vertices, colours);
 	
-	//geometry->elementCount = vertices.size() / 2;
-
-	const GLfloat vertices[][2] = {
-		{ -.6f, -.4f },
-		{ .6f, .4f }
-	};
-
-	const GLfloat colours[][3] = {
-		{ 1.0f, 0.0f, 0.0f },
-		{ 0.0f, 0.0f, 1.0f }
-	};
-	geometry->elementCount = 2;
+	geometry->elementCount = vertices.size() / 2;
 
 	// these vertex attribute indices correspond to those specified for the
 	// input variables in the vertex shader
@@ -210,12 +206,12 @@ bool InitializeGeometry(MyGeometry *geometry)
 	// create an array buffer object for storing our vertices
 	glGenBuffers(1, &geometry->vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry->vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	// create another one for storing our colours
 	glGenBuffers(1, &geometry->colourBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry->colourBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colours), colours, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, colours.size()*sizeof(GLfloat), colours.data(), GL_STATIC_DRAW);
 
 	// create a vertex array object encapsulating all our vertex attributes
 	glGenVertexArrays(1, &geometry->vertexArray);
@@ -341,7 +337,7 @@ int main(int argc, char *argv[])
 	if (!InitializeGeometry(&geometry))
 		cout << "Program failed to intialize geometry!" << endl;
 
-	glPatchParameteri(GL_PATCH_VERTICES, 2);
+	glPatchParameteri(GL_PATCH_VERTICES, 3);
 
 	// run an event-triggered main loop
 	while (!glfwWindowShouldClose(window))
