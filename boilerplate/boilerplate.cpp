@@ -335,9 +335,9 @@ int main(int argc, char *argv[])
 	// call function to create and fill buffers with geometry data
 	MyGeometry geometry;
 	if (!InitializeGeometry(&geometry))
-		cout << "Program failed to intialize geometry!" << endl;
+		cout << "Program failed to initialize geometry!" << endl;
 
-	glPatchParameteri(GL_PATCH_VERTICES, 3);
+	glPatchParameteri(GL_PATCH_VERTICES, 4);
 
 	// run an event-triggered main loop
 	while (!glfwWindowShouldClose(window))
