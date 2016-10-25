@@ -21,34 +21,28 @@ void main()
 	
 	if(isQuadratic)
 	{
-		// Just like bezier sum
+		// quadratic bezier
 		gl_Position = b0 * b0 * gl_in[0].gl_Position +
-			  b0 * b1 * gl_in[1].gl_Position +
+			  2 * b0 * b1 * gl_in[1].gl_Position +
 			  b1 * b1 * gl_in[2].gl_Position;
 	
 		// Determine colours for new points
 		Colour 	= b0 * b0 *teColour[0] + 
-		     	  b0 * b1 * teColour[1] +
+		     	  2 * b0 * b1 * teColour[1] +
 				  b1 * b1 * teColour[2];
 	}
 	else
 	{
-	    // order 3 bernstein basis
-		float b0 = (1.-u) * (1.-u) * (1.-u);
-		float b1 = 3. * u * (1.-u) * (1.-u);
-		float b2 = 3. * u * u * (1.-u);
-		float b3 = u * u * u;
-	
-		// Just like bezier sum
-		gl_Position = b0 * gl_in[0].gl_Position +
-			  b1 * gl_in[1].gl_Position +
-			  b2 * gl_in[2].gl_Position +
-			  b3 * gl_in[3].gl_Position;
+		// cubic bezier
+		gl_Position = b0 * b0 * b0 * gl_in[0].gl_Position +
+			  3 * b0 * b0 * b1 * gl_in[1].gl_Position +
+			  3 * b0 * b1 * b1 * gl_in[2].gl_Position +
+			  b1 * b1* b1 * gl_in[3].gl_Position;
 	
 		// Determine colours for new points
-		Colour 	= b0 * teColour[0] + 
-		     	  b1 * teColour[1] +
-				  b2 * teColour[2] +
-				  b3 * teColour[3];
+		Colour 	= b0 * b0 * b0 * teColour[0] + 
+		     	  3 * b0 * b0 * b1 * teColour[1] +
+				  3 * b0 * b1 * b1 * teColour[2] +
+				  b1 * b1* b1 * teColour[3];
 	}
 }

@@ -163,21 +163,55 @@ void initCubicControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colours)
 {
 	GLfloat scale = 10.0f;
 
+   // first set
 	vertices.push_back(1.0f / scale);
 	vertices.push_back(1.0f / scale);
-
 	vertices.push_back(4.0f / scale);
 	vertices.push_back(0.0f / scale);
-	vertices.push_back(4.0f / scale);
-	vertices.push_back(0.0f / scale);
-
 	vertices.push_back(6.0f / scale);
 	vertices.push_back(2.0f / scale);
-	vertices.push_back(6.0f / scale);
-	vertices.push_back(2.0f / scale);
-
 	vertices.push_back(9.0f / scale);
 	vertices.push_back(1.0f / scale);
+
+   // second set
+   vertices.push_back(8.0f / scale);
+   vertices.push_back(2.0f / scale);
+   vertices.push_back(0.0f / scale);
+   vertices.push_back(8.0f / scale);
+   vertices.push_back(0.0f / scale);
+   vertices.push_back(-2.0f / scale);
+   vertices.push_back(8.0f / scale);
+   vertices.push_back(4.0f / scale);
+
+   // third set
+   vertices.push_back(5.0f / scale);
+   vertices.push_back(3.0f / scale);
+   vertices.push_back(3.0f / scale);
+   vertices.push_back(2.0f / scale);
+   vertices.push_back(3.0f / scale);
+   vertices.push_back(3.0f / scale);
+   vertices.push_back(5.0f / scale);
+   vertices.push_back(2.0f / scale);
+
+   // fourth set
+   vertices.push_back(3.0f / scale);
+   vertices.push_back(2.2f / scale);
+   vertices.push_back(3.5f / scale);
+   vertices.push_back(2.7f / scale);
+   vertices.push_back(3.5f / scale);
+   vertices.push_back(3.3f / scale);
+   vertices.push_back(3.0f / scale);
+   vertices.push_back(3.8f / scale);
+
+   // fifth set
+   vertices.push_back(2.8f / scale);
+   vertices.push_back(3.5f / scale);
+   vertices.push_back(2.4f / scale);
+   vertices.push_back(3.8f / scale);
+   vertices.push_back(2.4f / scale);
+   vertices.push_back(3.2f / scale);
+   vertices.push_back(2.8f / scale);
+   vertices.push_back(3.5f / scale);
 
 	for (int i = 0; i < vertices.size() / 2; i++)
 	{
@@ -193,8 +227,8 @@ bool InitializeGeometry(MyGeometry *geometry)
 	vector<GLfloat> vertices;
 	vector<GLfloat> colours;
 
-	initQuadraticControlPoints(vertices, colours);
-	//initCubicControlPoints(vertices, colours);
+	//initQuadraticControlPoints(vertices, colours);
+	initCubicControlPoints(vertices, colours);
 	
 	geometry->elementCount = vertices.size() / 2;
 
@@ -337,11 +371,11 @@ int main(int argc, char *argv[])
 	if (!InitializeGeometry(&geometry))
 		cout << "Program failed to initialize geometry!" << endl;
 
-	glPatchParameteri(GL_PATCH_VERTICES, 3);
+	glPatchParameteri(GL_PATCH_VERTICES, 4);
 
    glUseProgram(shader.program);
    GLuint isQuadraticUniform = glGetUniformLocation(shader.program, "isQuadratic");
-   glUniform1i(isQuadraticUniform, true);
+   glUniform1i(isQuadraticUniform, false);
 
 	// run an event-triggered main loop
 	while (!glfwWindowShouldClose(window))

@@ -1,6 +1,6 @@
 #version 410
 
-layout(vertices = 3) out; //How long gl_out[] should be
+layout(vertices = 4) out; //How long gl_out[] should be
 
 in vec3 tcColour[];
 out vec3 teColour[];
