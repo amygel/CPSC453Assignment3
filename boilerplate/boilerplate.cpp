@@ -44,6 +44,9 @@ string LoadSource(const string &filename);
 GLuint CompileShader(GLenum shaderType, const string &source);
 GLuint LinkProgram(GLuint vertexShader, GLuint TCSshader, GLuint TESshader, GLuint fragmentShader);
 
+// Global Variables
+static bool isQuadratic = true;
+
 // --------------------------------------------------------------------------
 // Functions to set up OpenGL shader programs for rendering
 
@@ -127,6 +130,10 @@ void initQuadraticControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colo
 	vertices.push_back(0.0f / scale);
 	vertices.push_back(-1.0f / scale);
 
+   // Fake points that will be ignored in shaders
+   vertices.push_back(0.0f / scale);
+   vertices.push_back(0.0f / scale);
+
 	//second set
    vertices.push_back(0.0f / scale);
    vertices.push_back(-1.0f / scale);
@@ -134,6 +141,10 @@ void initQuadraticControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colo
    vertices.push_back(-1.0f / scale);
    vertices.push_back(-1.0f / scale);
    vertices.push_back(1.0f / scale);
+
+   // Fake points that will be ignored in shaders
+   vertices.push_back(0.0f / scale);
+   vertices.push_back(0.0f / scale);
 
 	// third set
    vertices.push_back(-1.0f / scale);
@@ -143,6 +154,10 @@ void initQuadraticControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colo
    vertices.push_back(1.0f / scale);
    vertices.push_back(1.0f / scale);
 
+   // Fake points that will be ignored in shaders
+   vertices.push_back(0.0f / scale);
+   vertices.push_back(0.0f / scale);
+
 	//fourth set
    vertices.push_back(1.2f / scale);
    vertices.push_back(0.5f / scale);
@@ -151,7 +166,11 @@ void initQuadraticControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colo
    vertices.push_back(1.3f / scale);
    vertices.push_back(-0.4f / scale);
 
-	for (int i = 0; i < vertices.size() / 2; i++)
+   // Fake points that will be ignored in shaders
+   vertices.push_back(0.0f / scale);
+   vertices.push_back(0.0f / scale);
+
+	for (unsigned int i = 0; i < vertices.size() / 2; i++)
 	{
 		colours.push_back(1.0f);
 		colours.push_back(0.0f);
@@ -161,7 +180,7 @@ void initQuadraticControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colo
 
 void initCubicControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colours)
 {
-	GLfloat scale = 10.0f;
+	GLfloat scale = 9.0f;
 
    // first set
 	vertices.push_back(1.0f / scale);
@@ -213,7 +232,7 @@ void initCubicControlPoints(vector<GLfloat>& vertices, vector<GLfloat>& colours)
    vertices.push_back(2.8f / scale);
    vertices.push_back(3.5f / scale);
 
-	for (int i = 0; i < vertices.size() / 2; i++)
+	for (unsigned int i = 0; i < vertices.size() / 2; i++)
 	{
 		colours.push_back(1.0f);
 		colours.push_back(0.0f);
@@ -227,8 +246,14 @@ bool InitializeGeometry(MyGeometry *geometry)
 	vector<GLfloat> vertices;
 	vector<GLfloat> colours;
 
-	//initQuadraticControlPoints(vertices, colours);
-	initCubicControlPoints(vertices, colours);
+   if (isQuadratic)
+   {
+      initQuadraticControlPoints(vertices, colours);
+   }
+   else
+   {
+      initCubicControlPoints(vertices, colours);
+   }
 	
 	geometry->elementCount = vertices.size() / 2;
 
@@ -317,6 +342,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+   else if (key == GLFW_KEY_C && action == GLFW_PRESS)
+   {
+      isQuadratic = !isQuadratic;
+   }
 }
 
 // ==========================================================================
@@ -368,24 +397,27 @@ int main(int argc, char *argv[])
 
 	// call function to create and fill buffers with geometry data
 	MyGeometry geometry;
-	if (!InitializeGeometry(&geometry))
-		cout << "Program failed to initialize geometry!" << endl;
 
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
-
-   glUseProgram(shader.program);
-   GLuint isQuadraticUniform = glGetUniformLocation(shader.program, "isQuadratic");
-   glUniform1i(isQuadraticUniform, false);
 
 	// run an event-triggered main loop
 	while (!glfwWindowShouldClose(window))
 	{
+      glUseProgram(shader.program);
+      GLuint isQuadraticUniform = glGetUniformLocation(shader.program, "isQuadratic");
+      glUniform1i(isQuadraticUniform, isQuadratic);
+
+      if (!InitializeGeometry(&geometry))
+         cout << "Program failed to initialize geometry!" << endl;
+
 		// call function to draw our scene
 		RenderScene(&geometry, &shader); //render scene with texture
 
 		glfwSwapBuffers(window);
 
 		glfwPollEvents();
+
+      DestroyGeometry(&geometry);
 	}
 
 	// clean up allocated resources before exit

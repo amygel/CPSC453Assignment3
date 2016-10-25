@@ -16,3 +16,4 @@ To Setup:
 4. Enjoy :)
 
 Keyboard Controls:
+c: Switch between quadratic and cubic bezier curves
