@@ -2,7 +2,7 @@
 
 layout(vertices = 4) out; //How long gl_out[] should be
 
-in vec3 tcColour[];
+in vec3 Colour[];
 out vec3 teColour[];
 
 void main()
@@ -15,5 +15,5 @@ void main()
     }
 
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;	// pass control points to TES
-    teColour[gl_InvocationID] = tcColour[gl_InvocationID]; 						// pass colours to TES
+    teColour[gl_InvocationID] = Colour[gl_InvocationID]; 						// pass colours to TES
 }
