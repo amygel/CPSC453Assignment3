@@ -215,54 +215,54 @@ void initCubicControlPoints()
     GLfloat scale = 9.0f;
 
     // first set
-    cubicColours_.push_back(1.0f / scale);
-    cubicColours_.push_back(1.0f / scale);
-    cubicColours_.push_back(4.0f / scale);
-    cubicColours_.push_back(0.0f / scale);
-    cubicColours_.push_back(6.0f / scale);
-    cubicColours_.push_back(2.0f / scale);
-    cubicColours_.push_back(9.0f / scale);
-    cubicColours_.push_back(1.0f / scale);
+    cubicVertices_.push_back(1.0f / scale);
+    cubicVertices_.push_back(1.0f / scale);
+    cubicVertices_.push_back(4.0f / scale);
+    cubicVertices_.push_back(0.0f / scale);
+    cubicVertices_.push_back(6.0f / scale);
+    cubicVertices_.push_back(2.0f / scale);
+    cubicVertices_.push_back(9.0f / scale);
+    cubicVertices_.push_back(1.0f / scale);
 
     // second set
-    cubicColours_.push_back(8.0f / scale);
-    cubicColours_.push_back(2.0f / scale);
-    cubicColours_.push_back(0.0f / scale);
-    cubicColours_.push_back(8.0f / scale);
-    cubicColours_.push_back(0.0f / scale);
-    cubicColours_.push_back(-2.0f / scale);
-    cubicColours_.push_back(8.0f / scale);
-    cubicColours_.push_back(4.0f / scale);
+    cubicVertices_.push_back(8.0f / scale);
+    cubicVertices_.push_back(2.0f / scale);
+    cubicVertices_.push_back(0.0f / scale);
+    cubicVertices_.push_back(8.0f / scale);
+    cubicVertices_.push_back(0.0f / scale);
+    cubicVertices_.push_back(-2.0f / scale);
+    cubicVertices_.push_back(8.0f / scale);
+    cubicVertices_.push_back(4.0f / scale);
 
     // third set
-    cubicColours_.push_back(5.0f / scale);
-    cubicColours_.push_back(3.0f / scale);
-    cubicColours_.push_back(3.0f / scale);
-    cubicColours_.push_back(2.0f / scale);
-    cubicColours_.push_back(3.0f / scale);
-    cubicColours_.push_back(3.0f / scale);
-    cubicColours_.push_back(5.0f / scale);
-    cubicColours_.push_back(2.0f / scale);
+    cubicVertices_.push_back(5.0f / scale);
+    cubicVertices_.push_back(3.0f / scale);
+    cubicVertices_.push_back(3.0f / scale);
+    cubicVertices_.push_back(2.0f / scale);
+    cubicVertices_.push_back(3.0f / scale);
+    cubicVertices_.push_back(3.0f / scale);
+    cubicVertices_.push_back(5.0f / scale);
+    cubicVertices_.push_back(2.0f / scale);
 
     // fourth set
-    cubicColours_.push_back(3.0f / scale);
-    cubicColours_.push_back(2.2f / scale);
-    cubicColours_.push_back(3.5f / scale);
-    cubicColours_.push_back(2.7f / scale);
-    cubicColours_.push_back(3.5f / scale);
-    cubicColours_.push_back(3.3f / scale);
-    cubicColours_.push_back(3.0f / scale);
-    cubicColours_.push_back(3.8f / scale);
+    cubicVertices_.push_back(3.0f / scale);
+    cubicVertices_.push_back(2.2f / scale);
+    cubicVertices_.push_back(3.5f / scale);
+    cubicVertices_.push_back(2.7f / scale);
+    cubicVertices_.push_back(3.5f / scale);
+    cubicVertices_.push_back(3.3f / scale);
+    cubicVertices_.push_back(3.0f / scale);
+    cubicVertices_.push_back(3.8f / scale);
 
     // fifth set
-    cubicColours_.push_back(2.8f / scale);
-    cubicColours_.push_back(3.5f / scale);
-    cubicColours_.push_back(2.4f / scale);
-    cubicColours_.push_back(3.8f / scale);
-    cubicColours_.push_back(2.4f / scale);
-    cubicColours_.push_back(3.2f / scale);
-    cubicColours_.push_back(2.8f / scale);
-    cubicColours_.push_back(3.5f / scale);
+    cubicVertices_.push_back(2.8f / scale);
+    cubicVertices_.push_back(3.5f / scale);
+    cubicVertices_.push_back(2.4f / scale);
+    cubicVertices_.push_back(3.8f / scale);
+    cubicVertices_.push_back(2.4f / scale);
+    cubicVertices_.push_back(3.2f / scale);
+    cubicVertices_.push_back(2.8f / scale);
+    cubicVertices_.push_back(3.5f / scale);
 
     for (unsigned int i = 0; i < cubicVertices_.size() / 2; i++)
     {
