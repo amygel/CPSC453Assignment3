@@ -51,8 +51,14 @@ enum Font { Lora = 0, SourceSansPro, GreatVibes, AlexBrush, Inconsolata, Amatic 
 // Global Variables
 static bool needsRedraw_ = true;
 static bool isQuadratic_ = true;
+static bool isScrolling_ = false;
 static Font currNameFont = Lora;
 static Font currTextFont = AlexBrush;
+static GLfloat offset_ = 1.1f;
+static GLfloat minOffset_ = -16.0f;
+GlyphExtractor extractor_;
+
+// Geometry Buffers
 vector<GLfloat> lineVertices_;
 vector<GLfloat> lineColours_;
 vector<GLfloat> quadraticVertices_;
@@ -274,13 +280,9 @@ void initCubicControlPoints()
    }
 }
 
-void initFont(string filename, string words, GLfloat offset, GLfloat speed)
+void initFont(GlyphExtractor& extractor, string words, GLfloat offset)
 {
    clearVectors();
-
-   //Load a font file and extract a glyph
-   GlyphExtractor extractor;
-   extractor.LoadFontFile(filename);
 
    GLfloat scale = 0.90f;
 
@@ -441,7 +443,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
    else if (key == GLFW_KEY_B && action == GLFW_PRESS)
    {
       needsRedraw_ = true;
+      isScrolling_ = false;
+
       isQuadratic_ = !isQuadratic_;
+
       if (isQuadratic_)
       {
          initQuadraticControlPoints();
@@ -454,18 +459,25 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
    else if (key == GLFW_KEY_N && action == GLFW_PRESS)
    {
       needsRedraw_ = true;
+      isScrolling_ = false;
 
       if (currNameFont == Lora)
       {
-         initFont("fonts/lora/Lora-Regular.ttf", "Amy", -.99f, 0.0f);
+         //Load a font file
+         extractor_.LoadFontFile("fonts/lora/Lora-Regular.ttf");
+         initFont(extractor_, "Amy", -.99f);
       }
       else if (currNameFont == SourceSansPro)
       {
-         initFont("fonts/source-sans-pro/SourceSansPro-Regular.otf", "Amy", -0.91f, 0.0f);
+         //Load a font file
+         extractor_.LoadFontFile("fonts/source-sans-pro/SourceSansPro-Regular.otf");
+         initFont(extractor_, "Amy", -0.91f);
       }
       else if (currNameFont == GreatVibes)
       {
-         initFont("fonts/great-vibes/GreatVibes-Regular.otf", "Amy", -0.85f, 0.0f);
+         //Load a font file
+         extractor_.LoadFontFile("fonts/great-vibes/GreatVibes-Regular.otf");
+         initFont(extractor_, "Amy", -0.85f);
       }
 
       currNameFont = static_cast<Font>((currNameFont + 1) % 3);
@@ -473,18 +485,25 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
    else if (key == GLFW_KEY_T && action == GLFW_PRESS)
    {
       needsRedraw_ = true;
+      isScrolling_ = true;
 
       if (currTextFont == AlexBrush)
       {
-         initFont("fonts/alex-brush/AlexBrush-Regular.ttf", "The quick brown fox jumps over the lazy dog.", 1.1f, 0.0f);
+         //Load a font file
+         minOffset_ = -16.0f;
+         extractor_.LoadFontFile("fonts/alex-brush/AlexBrush-Regular.ttf");
       }
       else if (currTextFont == Inconsolata)
       {
-         initFont("fonts/inconsolata/Inconsolata.otf", "The quick brown fox jumps over the lazy dog.", 1.1f, 0.0f);
+         //Load a font file
+         minOffset_ = -23.0f;
+         extractor_.LoadFontFile("fonts/inconsolata/Inconsolata.otf");
       }
       else if (currTextFont == Amatic)
       {
-         initFont("fonts/amatic/AmaticSC-Regular.ttf", "The quick brown fox jumps over the lazy dog.", 1.1f, 0.0f);
+         //Load a font file
+         minOffset_ = -13.0f;
+         extractor_.LoadFontFile("fonts/amatic/AmaticSC-Regular.ttf");
       }
 
       currTextFont = static_cast<Font>(currTextFont + 1);
@@ -602,6 +621,19 @@ int main(int argc, char *argv[])
          }
 
          needsRedraw_ = false;
+      }
+
+      if (isScrolling_ == true)
+      {
+         offset_ -= 0.03f;
+         if (offset_ <= minOffset_)
+         {
+            offset_ = 1.1f;
+         }
+
+         initFont(extractor_, "The quick brown fox jumps over the lazy dog.", offset_);
+
+         needsRedraw_ = true;
       }
 
       glfwSwapBuffers(window);
