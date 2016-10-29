@@ -280,7 +280,17 @@ void initFont(string filename, string words)
     GlyphExtractor extractor;
     extractor.LoadFontFile(filename);
 
-    GLfloat offset = 0;
+    GLfloat offset = -.99f;
+    GLfloat scale = 0.90f;
+
+    if (filename == "fonts/source-sans-pro/SourceSansPro-Regular.otf")
+    {
+       offset += 0.08f;
+    }
+    else if (filename == "fonts/great-vibes/GreatVibes-Regular.otf")
+    {
+       offset += 0.15f;
+    }
 
     // Go through each character
     for (unsigned int i = 0; i < words.size(); i++)
@@ -298,8 +308,8 @@ void initFont(string filename, string words)
                 {
                     for (int j = 0; j < 2; j++)
                     {
-                        lineVertices_.push_back(seg.x[j] + offset);
-                        lineVertices_.push_back(seg.y[j]);
+                       lineVertices_.push_back((seg.x[j] + offset) * scale);
+                       lineVertices_.push_back(seg.y[j] * scale);
                     }
                 }
                 // quadratic
@@ -307,8 +317,8 @@ void initFont(string filename, string words)
                 {
                     for (int j = 0; j < 3; j++)
                     {
-                        quadraticVertices_.push_back(seg.x[j] + offset);
-                        quadraticVertices_.push_back(seg.y[j]);
+                       quadraticVertices_.push_back((seg.x[j] + offset) * scale);
+                       quadraticVertices_.push_back(seg.y[j] * scale);
                     }
                 }
                 // cubic
@@ -316,8 +326,8 @@ void initFont(string filename, string words)
                 {
                     for (int j = 0; j < 4; j++)
                     {
-                        cubicVertices_.push_back(seg.x[j] + offset);
-                        cubicVertices_.push_back(seg.y[j]);
+                       cubicVertices_.push_back((seg.x[j] + offset) * scale);
+                       cubicVertices_.push_back(seg.y[j] * scale);
                     }
                 }
             }
@@ -328,17 +338,17 @@ void initFont(string filename, string words)
     // init line colours
     for (unsigned int j = 0; j < lineVertices_.size() / 2; j++)
     {
+        lineColours_.push_back(0.0f);
+        lineColours_.push_back(0.0f);
         lineColours_.push_back(1.0f);
-        lineColours_.push_back(0.0f);
-        lineColours_.push_back(0.0f);
     }
 
     // init quadratic colours
     for (unsigned int j = 0; j < quadraticVertices_.size() / 2; j++)
     {
         quadraticColours_.push_back(0.0f);
-        quadraticColours_.push_back(1.0f);
         quadraticColours_.push_back(0.0f);
+        quadraticColours_.push_back(1.0f);
     }
 
     // init cubic colours
