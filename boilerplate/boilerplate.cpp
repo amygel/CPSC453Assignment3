@@ -272,7 +272,7 @@ void initCubicControlPoints()
     }
 }
 
-void initFont(string filename)
+void initFont(string filename, string words)
 {
     clearVectors();
 
@@ -280,43 +280,53 @@ void initFont(string filename)
     GlyphExtractor extractor;
     extractor.LoadFontFile(filename);
 
-    // Load a character
-    MyGlyph glyph = extractor.ExtractGlyph('a');
-   
-    // load the contours
-    for each(MyContour contour in glyph.contours)
+    GLfloat offset = 0;
+
+    // Go through each character
+    for (unsigned int i = 0; i < words.size(); i++)
     {
-        for each(MySegment seg in contour)
+        // Load a character
+        MyGlyph glyph = extractor.ExtractGlyph(words[i]);
+
+        // load the contours
+        for each(MyContour contour in glyph.contours)
         {
-            if (seg.degree == 1)
+            for each(MySegment seg in contour)
             {
-                for (int i = 0; i < 2; i++)
+                // linear 
+                if (seg.degree == 1)
                 {
-                    lineVertices_.push_back(seg.x[i]);
-                    lineVertices_.push_back(seg.y[i]);
+                    for (int j = 0; j < 2; j++)
+                    {
+                        lineVertices_.push_back(seg.x[j] + offset);
+                        lineVertices_.push_back(seg.y[j]);
+                    }
                 }
-            }
-            else if (seg.degree == 2)
-            {
-                for (int i = 0; i < 3; i++)
+                // quadratic
+                else if (seg.degree == 2)
                 {
-                    quadraticVertices_.push_back(seg.x[i]);
-                    quadraticVertices_.push_back(seg.y[i]);
+                    for (int j = 0; j < 3; j++)
+                    {
+                        quadraticVertices_.push_back(seg.x[j] + offset);
+                        quadraticVertices_.push_back(seg.y[j]);
+                    }
                 }
-            }
-            else if (seg.degree == 3)
-            {
-                for (int i = 0; i < 4; i++)
+                // cubic
+                else if (seg.degree == 3)
                 {
-                    cubicVertices_.push_back(seg.x[i]);
-                    cubicVertices_.push_back(seg.y[i]);
+                    for (int j = 0; j < 4; j++)
+                    {
+                        cubicVertices_.push_back(seg.x[j] + offset);
+                        cubicVertices_.push_back(seg.y[j]);
+                    }
                 }
             }
         }
+        offset += glyph.advance;
     }
    
     // init line colours
-    for (unsigned int i = 0; i < lineVertices_.size() / 2; i++)
+    for (unsigned int j = 0; j < lineVertices_.size() / 2; j++)
     {
         lineColours_.push_back(1.0f);
         lineColours_.push_back(0.0f);
@@ -324,7 +334,7 @@ void initFont(string filename)
     }
 
     // init quadratic colours
-    for (unsigned int i = 0; i < quadraticVertices_.size() / 2; i++)
+    for (unsigned int j = 0; j < quadraticVertices_.size() / 2; j++)
     {
         quadraticColours_.push_back(0.0f);
         quadraticColours_.push_back(1.0f);
@@ -332,7 +342,7 @@ void initFont(string filename)
     }
 
     // init cubic colours
-    for (unsigned int i = 0; i < cubicVertices_.size() / 2; i++)
+    for (unsigned int j= 0; j < cubicVertices_.size() / 2; j++)
     {
         cubicColours_.push_back(0.0f);
         cubicColours_.push_back(0.0f);
@@ -442,15 +452,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     {
         if (currFont == Lora)
         {
-            initFont("fonts/lora/Lora-Regular.ttf");
+            initFont("fonts/lora/Lora-Regular.ttf", "Amy");
         }
         else if (currFont == SourceSansPro)
         {
-            initFont("fonts/source-sans-pro/SourceSansPro-Regular.otf");
+            initFont("fonts/source-sans-pro/SourceSansPro-Regular.otf", "Amy");
         }
         else if (currFont == GreatVibes)
         {
-            initFont("fonts/great-vibes/GreatVibes-Regular.otf");
+            initFont("fonts/great-vibes/GreatVibes-Regular.otf", "Amy");
         }
 
         currFont = static_cast<Font>((currFont + 1) % 3);
