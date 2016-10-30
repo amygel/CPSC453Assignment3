@@ -56,6 +56,7 @@ static Font currNameFont = Lora;
 static Font currTextFont = AlexBrush;
 static GLfloat offset_ = 1.1f;
 static GLfloat minOffset_ = -16.0f;
+static GLfloat multiplier_ = 1.0f;
 GlyphExtractor extractor_;
 
 // Geometry Buffers
@@ -512,6 +513,18 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
          currTextFont = static_cast<Font>(3);
       }
    }
+   else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+   {
+      multiplier_ -= 0.2f;
+      if (multiplier_ <= 0)
+      {
+         multiplier_ = 0.1f;
+      }
+   }
+   else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+   {
+      multiplier_ += 0.2f;
+   }
 }
 
 // ==========================================================================
@@ -625,7 +638,7 @@ int main(int argc, char *argv[])
 
       if (isScrolling_ == true)
       {
-         offset_ -= 0.03f;
+         offset_ -= (0.03f * multiplier_);
          if (offset_ <= minOffset_)
          {
             offset_ = 1.1f;
