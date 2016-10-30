@@ -60,6 +60,8 @@ static GLfloat multiplier_ = 1.0f;
 GlyphExtractor extractor_;
 
 // Geometry Buffers
+vector<GLfloat> pointVertices_;
+vector<GLfloat> pointColours_;
 vector<GLfloat> lineVertices_;
 vector<GLfloat> lineColours_;
 vector<GLfloat> quadraticVertices_;
@@ -161,11 +163,13 @@ struct MyGeometry
 void clearVectors()
 {
    // clear vertices
+   pointVertices_.clear();
    lineVertices_.clear();
    quadraticVertices_.clear();
    cubicVertices_.clear();
 
    // clear colours
+   pointColours_.clear();
    lineColours_.clear();
    quadraticColours_.clear();
    cubicColours_.clear();
@@ -185,6 +189,18 @@ void initQuadraticControlPoints()
    quadraticVertices_.push_back(0.0f / scale);
    quadraticVertices_.push_back(-1.0f / scale);
 
+   // line equivalent
+   lineVertices_.push_back(1.0f / scale);
+   lineVertices_.push_back(1.0f / scale);
+
+   lineVertices_.push_back(2.0f / scale);
+   lineVertices_.push_back(-1.0f / scale);
+   lineVertices_.push_back(2.0f / scale);
+   lineVertices_.push_back(-1.0f / scale);
+
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(-1.0f / scale);
+
    //second set
    quadraticVertices_.push_back(0.0f / scale);
    quadraticVertices_.push_back(-1.0f / scale);
@@ -192,6 +208,18 @@ void initQuadraticControlPoints()
    quadraticVertices_.push_back(-1.0f / scale);
    quadraticVertices_.push_back(-1.0f / scale);
    quadraticVertices_.push_back(1.0f / scale);
+
+   // line equivalent
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(-1.0f / scale);
+
+   lineVertices_.push_back(-2.0f / scale);
+   lineVertices_.push_back(-1.0f / scale);
+   lineVertices_.push_back(-2.0f / scale);
+   lineVertices_.push_back(-1.0f / scale);
+
+   lineVertices_.push_back(-1.0f / scale);
+   lineVertices_.push_back(1.0f / scale);
 
    // third set
    quadraticVertices_.push_back(-1.0f / scale);
@@ -201,6 +229,18 @@ void initQuadraticControlPoints()
    quadraticVertices_.push_back(1.0f / scale);
    quadraticVertices_.push_back(1.0f / scale);
 
+   // line equivalent
+   lineVertices_.push_back(-1.0f / scale);
+   lineVertices_.push_back(1.0f / scale);
+
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(1.0f / scale);
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(1.0f / scale);
+
+   lineVertices_.push_back(1.0f / scale);
+   lineVertices_.push_back(1.0f / scale);
+
    //fourth set
    quadraticVertices_.push_back(1.2f / scale);
    quadraticVertices_.push_back(0.5f / scale);
@@ -209,11 +249,52 @@ void initQuadraticControlPoints()
    quadraticVertices_.push_back(1.3f / scale);
    quadraticVertices_.push_back(-0.4f / scale);
 
+   // line equivalent
+   lineVertices_.push_back(1.2f / scale);
+   lineVertices_.push_back(0.5f / scale);
+
+   lineVertices_.push_back(2.5f / scale);
+   lineVertices_.push_back(1.0f / scale);
+   lineVertices_.push_back(2.5f / scale);
+   lineVertices_.push_back(1.0f / scale);
+
+   lineVertices_.push_back(1.3f / scale);
+   lineVertices_.push_back(-0.4f / scale);
+
+   // add control points to vector
+   pointVertices_ = quadraticVertices_;
+
+   // init quadratic colours
    for (unsigned int i = 0; i < quadraticVertices_.size() / 2; i++)
    {
+      quadraticColours_.push_back(0.2f);
+      quadraticColours_.push_back(0.2f);
       quadraticColours_.push_back(1.0f);
-      quadraticColours_.push_back(0.0f);
-      quadraticColours_.push_back(0.0f);
+   }
+
+   // init line colours
+   for (unsigned int i = 0; i < lineVertices_.size() / 2; i++)
+   {
+      lineColours_.push_back(0.0f);
+      lineColours_.push_back(0.0f);
+      lineColours_.push_back(0.3f);
+   }
+
+   // init point colours
+   for (unsigned int i = 0; i < pointVertices_.size() / 2; i++)
+   {
+      if (i % 3 == 0 || i % 3 == 2)
+      {
+         pointColours_.push_back(1.0f);
+         pointColours_.push_back(0.0f);
+         pointColours_.push_back(0.0f);
+      }
+      else
+      {
+         pointColours_.push_back(1.0f);
+         pointColours_.push_back(1.0f);
+         pointColours_.push_back(0.0f);
+      }
    }
 }
 
@@ -233,6 +314,23 @@ void initCubicControlPoints()
    cubicVertices_.push_back(9.0f / scale);
    cubicVertices_.push_back(1.0f / scale);
 
+   // line equivalent
+   lineVertices_.push_back(1.0f / scale);
+   lineVertices_.push_back(1.0f / scale);
+
+   lineVertices_.push_back(4.0f / scale);
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(4.0f / scale);
+   lineVertices_.push_back(0.0f / scale);
+
+   lineVertices_.push_back(6.0f / scale);
+   lineVertices_.push_back(2.0f / scale);
+   lineVertices_.push_back(6.0f / scale);
+   lineVertices_.push_back(2.0f / scale);
+
+   lineVertices_.push_back(9.0f / scale);
+   lineVertices_.push_back(1.0f / scale);
+
    // second set
    cubicVertices_.push_back(8.0f / scale);
    cubicVertices_.push_back(2.0f / scale);
@@ -242,6 +340,23 @@ void initCubicControlPoints()
    cubicVertices_.push_back(-2.0f / scale);
    cubicVertices_.push_back(8.0f / scale);
    cubicVertices_.push_back(4.0f / scale);
+
+   // line equivalent
+   lineVertices_.push_back(8.0f / scale);
+   lineVertices_.push_back(2.0f / scale);
+
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(8.0f / scale);
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(8.0f / scale);
+
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(-2.0f / scale);
+   lineVertices_.push_back(0.0f / scale);
+   lineVertices_.push_back(-2.0f / scale);
+
+   lineVertices_.push_back(8.0f / scale);
+   lineVertices_.push_back(4.0f / scale);
 
    // third set
    cubicVertices_.push_back(5.0f / scale);
@@ -253,6 +368,23 @@ void initCubicControlPoints()
    cubicVertices_.push_back(5.0f / scale);
    cubicVertices_.push_back(2.0f / scale);
 
+   // line equivalent
+   lineVertices_.push_back(5.0f / scale);
+   lineVertices_.push_back(3.0f / scale);
+
+   lineVertices_.push_back(3.0f / scale);
+   lineVertices_.push_back(2.0f / scale);
+   lineVertices_.push_back(3.0f / scale);
+   lineVertices_.push_back(2.0f / scale);
+
+   lineVertices_.push_back(3.0f / scale);
+   lineVertices_.push_back(3.0f / scale);
+   lineVertices_.push_back(3.0f / scale);
+   lineVertices_.push_back(3.0f / scale);
+
+   lineVertices_.push_back(5.0f / scale);
+   lineVertices_.push_back(2.0f / scale);
+
    // fourth set
    cubicVertices_.push_back(3.0f / scale);
    cubicVertices_.push_back(2.2f / scale);
@@ -262,6 +394,23 @@ void initCubicControlPoints()
    cubicVertices_.push_back(3.3f / scale);
    cubicVertices_.push_back(3.0f / scale);
    cubicVertices_.push_back(3.8f / scale);
+
+   // line equivalent
+   lineVertices_.push_back(3.0f / scale);
+   lineVertices_.push_back(2.2f / scale);
+
+   lineVertices_.push_back(3.5f / scale);
+   lineVertices_.push_back(2.7f / scale);
+   lineVertices_.push_back(3.5f / scale);
+   lineVertices_.push_back(2.7f / scale);
+
+   lineVertices_.push_back(3.5f / scale);
+   lineVertices_.push_back(3.3f / scale);
+   lineVertices_.push_back(3.5f / scale);
+   lineVertices_.push_back(3.3f / scale);
+
+   lineVertices_.push_back(3.0f / scale);
+   lineVertices_.push_back(3.8f / scale);
 
    // fifth set
    cubicVertices_.push_back(2.8f / scale);
@@ -273,11 +422,57 @@ void initCubicControlPoints()
    cubicVertices_.push_back(2.8f / scale);
    cubicVertices_.push_back(3.5f / scale);
 
+   // line equivalent
+   lineVertices_.push_back(2.8f / scale);
+   lineVertices_.push_back(3.5f / scale);
+
+   lineVertices_.push_back(2.4f / scale);
+   lineVertices_.push_back(3.8f / scale);
+   lineVertices_.push_back(2.4f / scale);
+   lineVertices_.push_back(3.8f / scale);
+
+   lineVertices_.push_back(2.4f / scale);
+   lineVertices_.push_back(3.2f / scale);
+   lineVertices_.push_back(2.4f / scale);
+   lineVertices_.push_back(3.2f / scale);
+
+   lineVertices_.push_back(2.8f / scale);
+   lineVertices_.push_back(3.5f / scale);
+
+   // add control points to vector
+   pointVertices_ = cubicVertices_;
+
+   // init curve colours
    for (unsigned int i = 0; i < cubicVertices_.size() / 2; i++)
    {
+      cubicColours_.push_back(0.2f);
+      cubicColours_.push_back(0.2f);
       cubicColours_.push_back(1.0f);
-      cubicColours_.push_back(0.0f);
-      cubicColours_.push_back(0.0f);
+   }
+
+   // init line colours
+   for (unsigned int i = 0; i < lineVertices_.size() / 2; i++)
+   {
+      lineColours_.push_back(0.0f);
+      lineColours_.push_back(0.0f);
+      lineColours_.push_back(0.3f);
+   }
+
+   // init point colours
+   for (unsigned int i = 0; i < pointVertices_.size() / 2; i++)
+   {
+      if (i % 4 == 0 || i % 4 == 3)
+      {
+         pointColours_.push_back(1.0f);
+         pointColours_.push_back(0.0f);
+         pointColours_.push_back(0.0f);
+      }
+      else
+      {
+         pointColours_.push_back(1.0f);
+         pointColours_.push_back(1.0f);
+         pointColours_.push_back(0.0f);
+      }
    }
 }
 
@@ -333,25 +528,25 @@ void initFont(GlyphExtractor& extractor, string words, GLfloat offset)
    // init line colours
    for (unsigned int j = 0; j < lineVertices_.size() / 2; j++)
    {
-      lineColours_.push_back(0.0f);
-      lineColours_.push_back(0.0f);
       lineColours_.push_back(1.0f);
+      lineColours_.push_back(0.0f);
+      lineColours_.push_back(0.0f);
    }
 
    // init quadratic colours
    for (unsigned int j = 0; j < quadraticVertices_.size() / 2; j++)
    {
-      quadraticColours_.push_back(0.0f);
-      quadraticColours_.push_back(0.0f);
       quadraticColours_.push_back(1.0f);
+      quadraticColours_.push_back(0.0f);
+      quadraticColours_.push_back(0.0f);
    }
 
    // init cubic colours
    for (unsigned int j = 0; j < cubicVertices_.size() / 2; j++)
    {
-      cubicColours_.push_back(0.0f);
-      cubicColours_.push_back(0.0f);
       cubicColours_.push_back(1.0f);
+      cubicColours_.push_back(0.0f);
+      cubicColours_.push_back(0.0f);
    }
 }
 
@@ -594,6 +789,8 @@ int main(int argc, char *argv[])
    // Start with quadratic bezier
    initQuadraticControlPoints();
 
+   glPointSize(5.0f);
+
    // run an event-triggered main loop
    while (!glfwWindowShouldClose(window))
    {
@@ -603,6 +800,15 @@ int main(int argc, char *argv[])
          // clear screen to a dark grey colour
          glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
          glClear(GL_COLOR_BUFFER_BIT);
+
+         // render lines
+         if (pointVertices_.size())
+         {
+            if (!InitializeGeometry(&lineGeometry, pointVertices_, pointColours_))
+               cout << "Program failed to initialize geometry!" << endl;
+
+            RenderScene(&lineGeometry, &lineShader, GL_POINTS);
+         }
 
          // render lines
          if (lineVertices_.size())
